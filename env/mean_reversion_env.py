@@ -80,5 +80,5 @@ class MeanReversionTradingEnv(gym.Env):
         return obs, reward, done, info
     
     
-    def render(self.mode='human'):
+    def render(self, mode='human'):
         print(f"Step: {self.current_step}, Total Profit: {self.total_profit:.2f}")
