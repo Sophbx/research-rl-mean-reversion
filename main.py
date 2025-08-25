@@ -1,4 +1,4 @@
-from data.get_SPY_day import fetch_daily_yahoo_data
+from data.get_SPY_day import fetch_daily_OHLCV
 from analysis.metrics import calculate_sharpe_and_drawdown
 from analysis.plot_returns import plot_cumulative_returns
 from analysis.logger import log_to_csv
@@ -9,7 +9,7 @@ strategy_modules = [
     'models.mean_reversion_20d_z1'
 ]
 
-df = fetch_daily_yahoo_data()
+df = fetch_daily_OHLCV()
 results = []
 
 for module_name in strategy_modules:
@@ -28,4 +28,4 @@ for module_name in strategy_modules:
     })
 
 # Save results
-log_to_csv(results, "strategy_comparison.csv")
+log_to_csv(results, "datastrategy_comparison.csv")
