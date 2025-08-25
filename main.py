@@ -9,7 +9,7 @@ strategy_modules = [
     'models.mean_reversion_20d_z1'
 ]
 
-df = fetch_daily_OHLCV()
+df = fetch_daily_OHLCV('SPY', '2020-01-01', '2025-08-22')
 results = []
 
 for module_name in strategy_modules:
@@ -28,4 +28,4 @@ for module_name in strategy_modules:
     })
 
 # Save results
-log_to_csv(results, "datastrategy_comparison.csv")
+log_to_csv(results, "strategy_comparison.csv")

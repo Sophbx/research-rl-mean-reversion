@@ -1,6 +1,16 @@
 import pandas as pd
 import numpy as np
 
+def _ensure_series(x, name=None, index=None):
+    """Coerce 1-col DataFrame/ndarray/list to a pandas Series."""
+    if isinstance(x, pd.DataFrame):
+        x = x.iloc[:, 0]
+    elif not isinstance(x, pd.Series):
+        x = pd.Series(x, index=index)
+    if name is not None:
+        x.name = name
+    return x
+
 def mean_reversion_20d_z1(data, window=20, entry=1.0, exit=0.25, target_vol_annual=0.10, cost_bps_one_way=5):
     """
     Implements a simple mean-reversion strategy:
@@ -34,19 +44,28 @@ def mean_reversion_20d_z1(data, window=20, entry=1.0, exit=0.25, target_vol_annu
     df['Position'] = df['Signal'].shift(1).fillna(0)
 
     # Vol targeting (use 20d realized vol on Close)
-    daily_vol = df['Close'].pct_change().rolling(20).std()
-    budget = target_vol_annual / np.sqrt(252)
-    target_w  = (budget / daily_vol.replace(0, np.nan)).clip(upper=3).reindex(df.index).fillna(0) 
+    ret_d = _ensure_series(df['Close'].pct_change(), name='ret_d', index=df.index)
+    daily_vol = _ensure_series(ret_d.rolling(20).std(), name='daily_vol', index=df.index)
+    budget = float(target_vol_annual) / np.sqrt(252)
+    target_w  = budget / daily_vol.replace(0, np.nan)
+    target_w = _ensure_series(target_w, name='target_w', index=df.index).clip(upper=3).fillna(0)
+
+    # sanity checks 
+    assert isinstance(target_w, pd.Series) and target_w.ndim == 1
+    assert isinstance(df['Position'], pd.Series) and df['Position'].ndim == 1
+
     df['Weight'] = df['Position'].mul(target_w, fill_value=0)
 
     # P&L with costs (bps per one-way trade)
-    ret = df['Close'].pct_change().fillna(0)
-    turnover = df['Weight'].diff().abs().fillna(df['Weight'].abs())
+    ret = _ensure_series(df['Close'].pct_change(), index=df.index).fillna(0)
+    turnover = _ensure_series(df['Weight'].diff().abs(), index=df.index).fillna(df['Weight'].abs())
     cost = (cost_bps_one_way/1e4) * turnover
-    df['Strategy'] = df['Weight'].shift(0) * ret - cost
+    df['Strategy'] = df['Weight'] * ret - cost
+    df['Returns'] = ret
+    if 'Date' not in df.columns:
+        df['Date'] = df.index
 
     return df.dropna()
-
 
 def get_name():
     return "MeanReversion_20d_z1"
