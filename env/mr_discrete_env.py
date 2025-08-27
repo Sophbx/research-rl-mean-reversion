@@ -108,6 +108,16 @@ class MRDiscreteEnv(gym.Env):
             return 0.0
         scale = self.budget / vol
         return float(np.clip(scale, 0.0, self.lev_cap))
+    
+    def _action_to_direction(self, a: int) -> float:
+        # 0 -> -1, 1 -> 0, 2 -> 1
+        if a == 0:
+            return -1.0
+        if a == 1:
+            return 0.0
+        if a == 2:
+            return +1.0
+        raise ValueError("Action must be 0/1/2")
 
     # Gym methods
     def reset(self, seed: int | None = None, options: dict | None = None):
