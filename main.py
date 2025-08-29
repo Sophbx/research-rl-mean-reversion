@@ -52,7 +52,7 @@ _, _, df_test = split_df(df)
 df_rl = eval_policy_to_df(model, df_test, reward_mode="return")  # same reward as training by default
 
 sharpe_rl, drawdown_rl = calculate_sharpe_and_drawdown(df_rl)
-plot_cumulative_returns(df_rl, title=f"mr_discrete_rl\nSharpe={sharpe_rl:.2f}, Drawdown={drawdown_rl:.2%}")
+plot_cumulative_returns(df_rl, title=f"mr_discrete_rl_return\nSharpe={sharpe_rl:.2f}, Drawdown={drawdown_rl:.2%}")
 
 results.append({
     "Strategy": "mr_discrete_rl",
@@ -74,7 +74,7 @@ robust_table = evaluate_policy_robustness(
     reward_mode="return",
     save_csv_path="robustness_grid.csv"
 )
-print("\n=== Robustness grid (saved to robustness_grid.csv) ===")
+print("\n=== Robustness grid ===")
 print(robust_table)
 
 print("\n=== Buy & Hold Sharpe on test period ===")
